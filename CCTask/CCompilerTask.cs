@@ -28,13 +28,15 @@ using Microsoft.Build.Framework;
 
 namespace CCTask
 {
-	public class CCompiler : Task
+	public class CCompilerTask : Task
 	{
+		[Required]
 		public ITaskItem[] Sources { get; set; }
 
+		[Required]
 		public string Output { get; set; }
 
-		public override bool Execute ()
+		public override bool Execute()
 		{
 			foreach(var source in Sources)
 			{

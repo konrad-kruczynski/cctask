@@ -36,8 +36,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="CCompiler.cs" />
     <Compile Include="CompilerProvider.cs" />
+    <Compile Include="CCompilerTask.cs" />
+    <Compile Include="Compilers\GCC.cs" />
+    <Compile Include="Compilers\ICompiler.cs" />
+    <Compile Include="Linkers\ILinker.cs" />
+    <Compile Include="Linkers\GLD.cs" />
+    <Compile Include="RunWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Compilers\" />
+    <Folder Include="Linkers\" />
+  </ItemGroup>
 </Project>

@@ -44,7 +44,7 @@ namespace CCTask
 
 		private void GetExecutables()
 		{
-
+			CCompilerPath = "gcc";
 		}
 	}
 }
