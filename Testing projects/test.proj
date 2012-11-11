@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="All" 
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+   <UsingTask AssemblyFile="CCTask.dll" TaskName="CCompiler"/>
+
+   <ItemGroup>
+     <CSources Include="first.c" />
+     <CSources Include="second.c" />
+     <CSources Include="another.c" />
+   </ItemGroup>
+
+   <Target Name="All">
+     <CCompiler Sources="@(CSources)" />
+   </Target>
+
+</Project>
