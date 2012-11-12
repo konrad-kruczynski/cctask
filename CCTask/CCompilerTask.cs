@@ -73,7 +73,7 @@ namespace CCTask
 				{
 					objectFiles.Add(objectFile);
 				}
-				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty))
+				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty, SourceHasChanged))
 				{
 					loopState.Break();
 				}
@@ -86,7 +86,7 @@ namespace CCTask
 
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			var result = linker.Link(objectFiles, Output, LFlags ?? string.Empty);
+			var result = linker.Link(objectFiles, Output, LFlags ?? string.Empty, SourceHasChanged);
 			SaveHashes();
 			return result;
 		}
@@ -123,7 +123,7 @@ namespace CCTask
 			return Path.Combine(buildDirectory, hash + ".o");
 		}
 
-		private bool HasSourceChanged(string sourcePath, string outputPath)
+		private bool SourceHasChanged(string sourcePath, string outputPath)
 		{
 			string hash;
 			using(var stream = File.OpenRead(sourcePath))

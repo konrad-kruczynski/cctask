@@ -7,15 +7,6 @@ namespace CCTask
 {
 	internal static class Utilities
 	{
-		public static bool SourceHasChanged(string source, string result)
-		{
-			if(string.IsNullOrEmpty(result) || !File.Exists(result) || string.IsNullOrEmpty(source) || !File.Exists(source))
-			{
-				return true;
-			}
-			return File.GetLastWriteTime(source) >= File.GetLastWriteTime(result);
-		}
-
 		public static bool RunAndGetOutput(string path, string options, out string output)
 		{
 			var startInfo = new ProcessStartInfo(path, options);

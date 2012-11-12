@@ -35,7 +35,7 @@ namespace CCTask.Compilers
 			this.pathToGcc = pathToGcc;
 		}
 
-		public bool Compile(string source, string output, string flags)
+		public bool Compile(string source, string output, string flags, Func<string, string, bool> sourceHasChanged)
 		{
 			// let's get all dependencies
 			string gccOutput;
@@ -46,7 +46,7 @@ namespace CCTask.Compilers
 			}
 			var sourceDirectory = Path.GetDirectoryName(source);
 			var dependencies = gccOutput.Trim().Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(x => Path.Combine(sourceDirectory, x));
-			if(!dependencies.Any(x => Utilities.SourceHasChanged(x, output)))
+			if(!dependencies.Any(x => sourceHasChanged(x, output)))
 			{
 				return true;
 			}

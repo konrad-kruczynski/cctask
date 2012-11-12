@@ -28,7 +28,7 @@ namespace CCTask.Compilers
 {
 	public interface ICompiler
 	{
-		bool Compile(string source, string output, string flags);
+		bool Compile(string source, string output, string flags, Func<string, string, bool> sourceHasChanged);
 	}
 }
 

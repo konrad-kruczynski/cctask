@@ -36,9 +36,9 @@ namespace CCTask.Linkers
 			this.pathToLd = pathToLd;
 		}
 
-		public bool Link(IList<string> objectFiles, string outputFile, string flags)
+		public bool Link(IList<string> objectFiles, string outputFile, string flags, Func<string, string, bool> sourceHasChanged)
 		{
-			if(!objectFiles.Any(x => Utilities.SourceHasChanged(x, outputFile)))
+			if(!objectFiles.Any(x => sourceHasChanged(x, outputFile)))
 			{
 				// everything is up to date
 				return true;
