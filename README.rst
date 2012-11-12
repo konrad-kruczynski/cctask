@@ -25,6 +25,10 @@ You can find sample project (three C files compiled to nothing-doing program) in
 
 and see what happens.
 
+Want more?
+----------
+Write an issue, do a pull request.
+
 Licence
 -------
 The project uses the MIT licence as you can tell from the source code.
