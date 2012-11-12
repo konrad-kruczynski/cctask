@@ -123,6 +123,16 @@ namespace CCTask
 			return Path.Combine(buildDirectory, hash + ".o");
 		}
 
+		private bool SourceHasChanged(IEnumerable<string> sources, string outputPath)
+		{
+			var changed = false;
+			foreach(var source in sources) 
+			{
+				changed = changed | SourceHasChanged(source, outputPath);
+			}
+			return changed;
+		}
+
 		private bool SourceHasChanged(string sourcePath, string outputPath)
 		{
 			if(!File.Exists(sourcePath))

@@ -23,12 +23,13 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
+using System.Collections.Generic;
 
 namespace CCTask.Compilers
 {
 	public interface ICompiler
 	{
-		bool Compile(string source, string output, string flags, Func<string, string, bool> sourceHasChanged);
+		bool Compile(string source, string output, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged);
 	}
 }
 

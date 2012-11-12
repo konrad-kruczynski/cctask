@@ -25,6 +25,7 @@
 using System;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 namespace CCTask.Compilers
 {
@@ -35,7 +36,7 @@ namespace CCTask.Compilers
 			this.pathToGcc = pathToGcc;
 		}
 
-		public bool Compile(string source, string output, string flags, Func<string, string, bool> sourceHasChanged)
+		public bool Compile(string source, string output, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
 		{
 			// let's get all dependencies
 			string gccOutput;
@@ -46,12 +47,7 @@ namespace CCTask.Compilers
 			}
 			var sourceDirectory = Path.GetDirectoryName(source);
 			var dependencies = gccOutput.Trim().Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(x => Path.Combine(sourceDirectory, x));
-			var changed = false;
-			foreach(var dependency in dependencies)
-			{
-				changed = sourceHasChanged(dependency, output) || changed;
-			}
-			if(!changed)
+			if(!sourceHasChanged(dependencies, output))
 			{
 				return true;
 			}
