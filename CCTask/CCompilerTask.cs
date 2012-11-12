@@ -49,14 +49,18 @@ namespace CCTask
 
 			// compilation
 			var compiler = CompilerProvider.Instance.CCompiler;
-			foreach(var source in Sources)
+			var result = System.Threading.Tasks.Parallel.ForEach(Sources, (source, loopState) =>
 			{
 				var objectFile = CToO(source.ItemSpec);
 				objectFiles.Add(objectFile);
 				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty))
 				{
-					return false;
+					loopState.Break();
 				}
+			});
+			if(result.LowestBreakIteration != null)
+			{
+				return false;
 			}
 
 			// linking
