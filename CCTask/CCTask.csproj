@@ -47,6 +47,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="ILogProvider.cs" />
     <Compile Include="XBuildLogProvider.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

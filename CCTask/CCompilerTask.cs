@@ -49,14 +49,23 @@ namespace CCTask
 			foreach(var source in Sources)
 			{
 				var objectFile = CToO(source.ItemSpec);
+				objectFiles.Add(objectFile);
+				if(!Utilities.SourceHasChanged(source.ItemSpec, objectFile))
+				{
+					continue;
+				}
 				if(!compiler.Compile(source.ItemSpec, objectFile))
 				{
 					return false;
 				}
-				objectFiles.Add(objectFile);
 			}
 
 			// linking
+			if(!objectFiles.Any(x => Utilities.SourceHasChanged(x, Output)))
+			{
+				// everything is up to date
+				return true;
+			}
 			var linker = CompilerProvider.Instance.CLinker;
 			return linker.Link(objectFiles, Output);
 		}
