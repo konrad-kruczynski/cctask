@@ -11,7 +11,7 @@
    </ItemGroup>
 
    <Target Name="All">
-     <CCompilerTask Sources="@(CSources)" Output="output" />
+     <CCompilerTask Sources="@(CSources)" CFlags="-O3" Output="output" />
    </Target>
 
 </Project>

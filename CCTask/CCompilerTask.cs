@@ -39,6 +39,9 @@ namespace CCTask
 		[Required]
 		public string Output { get; set; }
 
+		public string CFlags { get; set; }
+		public string LFlags { get; set; }
+
 		public override bool Execute()
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
@@ -54,7 +57,7 @@ namespace CCTask
 				{
 					continue;
 				}
-				if(!compiler.Compile(source.ItemSpec, objectFile))
+				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty))
 				{
 					return false;
 				}
@@ -67,7 +70,7 @@ namespace CCTask
 				return true;
 			}
 			var linker = CompilerProvider.Instance.CLinker;
-			return linker.Link(objectFiles, Output);
+			return linker.Link(objectFiles, Output, LFlags ?? string.Empty);
 		}
 
 		private static string CToO(string source)

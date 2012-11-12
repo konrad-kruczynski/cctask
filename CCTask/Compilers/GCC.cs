@@ -34,9 +34,9 @@ namespace CCTask.Compilers
 			this.pathToGcc = pathToGcc;
 		}
 
-		public bool Compile(string source, string output)
+		public bool Compile(string source, string output, string flags)
 		{
-			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} -c -o {1}", source, output));
+			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} {2} -c -o {1}", source, output, flags));
 			Logger.Instance.LogMessage("CC {0}", Path.GetFileName(output));
 			return runWrapper.Run();
 		}
