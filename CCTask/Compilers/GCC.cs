@@ -46,7 +46,12 @@ namespace CCTask.Compilers
 			}
 			var sourceDirectory = Path.GetDirectoryName(source);
 			var dependencies = gccOutput.Trim().Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(x => Path.Combine(sourceDirectory, x));
-			if(!dependencies.Any(x => sourceHasChanged(x, output)))
+			var changed = false;
+			foreach(var dependency in dependencies)
+			{
+				changed = sourceHasChanged(dependency, output) || changed;
+			}
+			if(!changed)
 			{
 				return true;
 			}

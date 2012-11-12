@@ -125,6 +125,10 @@ namespace CCTask
 
 		private bool SourceHasChanged(string sourcePath, string outputPath)
 		{
+			if(!File.Exists(sourcePath))
+			{
+				return true;
+			}
 			string hash;
 			using(var stream = File.OpenRead(sourcePath))
 			{
