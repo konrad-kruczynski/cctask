@@ -5,7 +5,7 @@ A XBuild/MSBuild task to compile C sources by Konrad Kruczyński.
 
 What is it?
 -----------
-So, at this moment this is just more or less a construction site ;) What I like to have here in the future is the XBuild/MSBuild task to enables you to compile C code on Linux, Windows or Mac. So, for example, if you have C# project that uses native binaries, you can compile it within xbuild. That's all ;)
+So, at this moment this is just more or less a construction site ;) What I like to have here in the future is the XBuild/MSBuild task that enables you to compile C sources on Linux, Windows or Mac. So, for example, if you have C# project that uses native binaries, you can compile it within xbuild. That's all ;)
 
 What it can do now?
 -------------------
@@ -19,7 +19,8 @@ Example
 -------
 You can find sample project (three C files compiled to nothing-doing program) in the ``Testing project`` subdirectory. Go to that directory and run:
 
-.. code:: bash
+.. code::
+
    xbuild test.proj
 
 and see what happens.
