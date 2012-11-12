@@ -51,7 +51,7 @@ namespace CCTask.Compilers
 				return true;
 			}
 			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} {2} -c -o {1}", source, output, flags));
-			Logger.Instance.LogMessage("CC {0}", Path.GetFileName(output));
+			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
 			return runWrapper.Run();
 		}
 

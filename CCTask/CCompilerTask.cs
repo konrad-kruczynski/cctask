@@ -28,6 +28,9 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CCTask
 {
@@ -42,10 +45,24 @@ namespace CCTask
 		public string CFlags { get; set; }
 		public string LFlags { get; set; }
 
+		public bool PutObjectFilesWhereSources { get; set; }
+
+		public CCompilerTask()
+		{
+			hasherSource = new ThreadLocal<MD5>(() => MD5.Create());
+			hashDb = new Dictionary<string, string>();
+		}
+
 		public override bool Execute()
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
 			var objectFiles = new List<string>();
+
+			buildDirectory = Path.Combine(Path.GetDirectoryName(Output), BuildDirectoryName + "_" + Path.GetFileName(Output));
+			Directory.CreateDirectory(buildDirectory);
+			hashDbFile = Path.Combine(buildDirectory, HashDbFilename);
+
+			LoadHashes();
 
 			// compilation
 			var compiler = CompilerProvider.Instance.CCompiler;
@@ -71,14 +88,71 @@ namespace CCTask
 			return linker.Link(objectFiles, Output, LFlags ?? string.Empty);
 		}
 
-		private static string CToO(string source)
+		private void LoadHashes()
 		{
-			if(Path.GetExtension(source) == ".c")
+			foreach(var line in File.ReadLines(hashDbFile))
 			{
-				return Path.GetDirectoryName(source) + Path.GetFileNameWithoutExtension(source) + ".o";
+				var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+				hashDb.Add(fileAndHash[0], fileAndHash[1]);
 			}
-			return source + ".o";
 		}
+
+		private void SaveHashes()
+		{
+			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1}", x.Key, x.Value)));
+		}
+
+		private string CToO(string source)
+		{
+			if(PutObjectFilesWhereSources)
+			{
+				if(Path.GetExtension(source) == ".c")
+				{
+					return Path.GetDirectoryName(source) + Path.GetFileNameWithoutExtension(source) + ".o";
+				}
+				return source + ".o";
+			}
+			var hash = CalculateMD5(source);
+			return Path.Combine(buildDirectory, hash + ".o");
+		}
+
+		private bool HasSourceChanged(string sourcePath, string outputPath)
+		{
+			string hash;
+			using(var stream = File.OpenRead(sourcePath))
+			{
+				var hasher = hasherSource.Value;
+				hash = BitConverter.ToString(hasher.ComputeHash(stream));
+			}
+
+			var result = false;
+			if(!hashDb.ContainsKey(sourcePath))
+			{
+				result = true;
+			}
+			else
+			{
+				result = hashDb[sourcePath] != hash;
+			}
+			if(result)
+			{
+				hashDb[sourcePath] = hash;
+			}
+			return result;
+		}
+
+		private string CalculateMD5(string s)
+		{
+			var md5 = hasherSource.Value;
+			return BitConverter.ToString(md5.ComputeHash(Encoding.UTF8.GetBytes(s))).ToLower().Replace("-", "");
+		}
+
+		private string buildDirectory;
+		private string hashDbFile;
+		private readonly Dictionary<string, string> hashDb;
+		private readonly ThreadLocal<MD5> hasherSource;
+		private const string BuildDirectoryName = "buildcache";
+		private const string HashDbFilename = "hashes";
 	}
 }
 

@@ -44,7 +44,7 @@ namespace CCTask.Linkers
 				return true;
 			}
 			var runWrapper = new RunWrapper(pathToLd, string.Format("{0} {2} -o {1}", objectFiles.Aggregate((x, y) => x + " " + y), outputFile, flags));
-			Logger.Instance.LogMessage("LD {0}", Path.GetFileName(outputFile));
+			Logger.Instance.LogMessage("LD: {0}", Path.GetFileName(outputFile));
 			return runWrapper.Run();
 		}
 
