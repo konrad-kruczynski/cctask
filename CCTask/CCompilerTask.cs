@@ -52,7 +52,10 @@ namespace CCTask
 			var result = System.Threading.Tasks.Parallel.ForEach(Sources, (source, loopState) =>
 			{
 				var objectFile = CToO(source.ItemSpec);
-				objectFiles.Add(objectFile);
+				lock(objectFiles)
+				{
+					objectFiles.Add(objectFile);
+				}
 				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty))
 				{
 					loopState.Break();
