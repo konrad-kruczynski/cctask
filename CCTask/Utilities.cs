@@ -8,7 +8,7 @@ namespace CCTask
 	{
 		public static bool SourceHasChanged(string source, string result)
 		{
-			if(string.IsNullOrEmpty(result) || !File.Exists(result) || string.IsNullOrEmpty(source)/* || !File.Exists(source)*/)
+			if(string.IsNullOrEmpty(result) || !File.Exists(result) || string.IsNullOrEmpty(source) || !File.Exists(source))
 			{
 				return true;
 			}
