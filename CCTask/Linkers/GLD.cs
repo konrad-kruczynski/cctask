@@ -23,14 +23,27 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.IO;
 
 namespace CCTask.Linkers
 {
-    public class GLD
+    public sealed class GLD : ILinker
 	{
-		public GLD()
+		public GLD(string pathToLd)
 		{
+			this.pathToLd = pathToLd;
 		}
+
+		public bool Link(IEnumerable<string> objectFiles, string outputFile)
+		{
+			var runWrapper = new RunWrapper(pathToLd, string.Format("{0} -o {1}", objectFiles.Aggregate((x, y) => x + " " + y), outputFile));
+			Logger.Instance.LogMessage("LD {0}", Path.GetFileName(outputFile));
+			return runWrapper.Run();
+		}
+
+		private readonly string pathToLd;
 	}
 }
 

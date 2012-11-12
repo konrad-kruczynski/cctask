@@ -23,11 +23,13 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
+using System.Collections.Generic;
 
 namespace CCTask.Linkers
 {
 	internal interface ILinker
 	{
+		bool Link(IEnumerable<string> objectFiles, string outputFile);
 	}
 }
 

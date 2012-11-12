@@ -24,6 +24,7 @@
  */ 
 using System;
 using CCTask.Compilers;
+using CCTask.Linkers;
 
 namespace CCTask
 {
@@ -32,6 +33,7 @@ namespace CCTask
 		internal static CompilerProvider Instance { get; private set; }
 
 		internal ICompiler CCompiler { get; private set; }
+		internal ILinker CLinker { get; private set; }
 
 		static CompilerProvider()
 		{
@@ -41,15 +43,18 @@ namespace CCTask
 		private CompilerProvider()
 		{
 			cCompilerPath = "cc"; // TODO: check existence
-			GetCompilers();
+			cLinkerPath = "cc"; // yup, that's what I meant here
+			GetCompilingExecs();
 		}
 
-		private void GetCompilers()
+		private void GetCompilingExecs()
 		{
 			CCompiler = new GCC(cCompilerPath);
+			CLinker = new GLD(cLinkerPath);
 		}
 
 		private readonly string cCompilerPath;
+		private readonly string cLinkerPath;
 	}
 }
 

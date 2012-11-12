@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
+using System.IO;
 
 namespace CCTask.Compilers
 {
@@ -36,7 +37,7 @@ namespace CCTask.Compilers
 		public bool Compile(string source, string output)
 		{
 			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} -c -o {1}", source, output));
-			Logger.Instance.LogMessage("CC {0}", output);
+			Logger.Instance.LogMessage("CC {0}", Path.GetFileName(output));
 			return runWrapper.Run();
 		}
 

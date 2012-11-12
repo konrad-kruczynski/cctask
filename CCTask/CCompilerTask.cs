@@ -27,6 +27,7 @@ using System.Linq;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
 using System.IO;
+using System.Collections.Generic;
 
 namespace CCTask
 {
@@ -41,11 +42,20 @@ namespace CCTask
 		public override bool Execute()
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
+			var objectFiles = new List<string>();
+
+			// compilation
 			var compiler = CompilerProvider.Instance.CCompiler;
 			foreach(var source in Sources)
 			{
-				compiler.Compile(source.ItemSpec, CToO(source.ItemSpec));
+				var objectFile = CToO(source.ItemSpec);
+				compiler.Compile(source.ItemSpec, objectFile);
+				objectFiles.Add(objectFile);
 			}
+
+			// linking
+			var linker = CompilerProvider.Instance.CLinker;
+			linker.Link(objectFiles, Output);
 			return true;
 		}
 
