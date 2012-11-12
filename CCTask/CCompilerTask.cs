@@ -93,6 +93,10 @@ namespace CCTask
 
 		private void LoadHashes()
 		{
+			if(!File.Exists(hashDbFile))
+			{
+				return;
+			}
 			foreach(var line in File.ReadLines(hashDbFile))
 			{
 				var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
