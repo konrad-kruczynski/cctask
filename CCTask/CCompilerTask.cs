@@ -66,7 +66,7 @@ namespace CCTask
 
 			// compilation
 			var compiler = CompilerProvider.Instance.CCompiler;
-			var result = System.Threading.Tasks.Parallel.ForEach(Sources, (source, loopState) =>
+			var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources, (source, loopState) =>
 			{
 				var objectFile = CToO(source.ItemSpec);
 				lock(objectFiles)
@@ -78,14 +78,17 @@ namespace CCTask
 					loopState.Break();
 				}
 			});
-			if(result.LowestBreakIteration != null)
+			SaveHashes();
+			if(compilationResult.LowestBreakIteration != null)
 			{
 				return false;
 			}
 
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			return linker.Link(objectFiles, Output, LFlags ?? string.Empty);
+			var result = linker.Link(objectFiles, Output, LFlags ?? string.Empty);
+			SaveHashes();
+			return result;
 		}
 
 		private void LoadHashes()
