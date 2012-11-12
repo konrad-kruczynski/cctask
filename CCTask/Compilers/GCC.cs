@@ -26,17 +26,20 @@ using System;
 
 namespace CCTask.Compilers
 {
-	public class GCC : ICompiler
+	public sealed class GCC : ICompiler
 	{
 		public GCC(string pathToGcc)
 		{
+			this.pathToGcc = pathToGcc;
 		}
 
 		public bool Compile(string source, string output)
 		{
-			throw new System.NotImplementedException();
+			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} -o {1}", source, output));
+			return runWrapper.Run();
 		}
 
+		private readonly string pathToGcc;
 	}
 }
 

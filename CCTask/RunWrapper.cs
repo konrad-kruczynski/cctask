@@ -24,39 +24,38 @@
  */ 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Utilities;
 
 namespace CCTask
 {
 	internal sealed class RunWrapper
 	{
-		internal RunWrapper(string path, string options, TaskLoggingHelper log)
+		internal RunWrapper(string path, string options)
 		{
-			this.log = log;
 			startInfo = new ProcessStartInfo(path, options);
 			startInfo.UseShellExecute = false;
 			startInfo.RedirectStandardError = true;
 			startInfo.RedirectStandardInput = true;
+			startInfo.RedirectStandardOutput = true;
 		}
 
 		internal bool Run ()
 		{
+			Logger.Instance.LogMessage("Going to run...");
 			var process = new Process { StartInfo = startInfo };
 			process.Start();
 			string line;
 			while((line = process.StandardOutput.ReadLine()) != null)
 			{
-				log.LogMessage(line);
+				Logger.Instance.LogMessage(line);
 			}
 			while((line = process.StandardError.ReadLine()) != null) 
 			{
-				log.LogWarning(line);
+				Logger.Instance.LogWarning(line);
 			}
 			return true;
 		}
 
 		private readonly ProcessStartInfo startInfo;
-		private readonly TaskLoggingHelper log;
 	}
 }
 

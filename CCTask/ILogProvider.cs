@@ -23,27 +23,14 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
-using System.Linq;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Framework;
 
 namespace CCTask
 {
-	public class CCompilerTask : Task
+	public interface ILogProvider
 	{
-		[Required]
-		public ITaskItem[] Sources { get; set; }
-
-		[Required]
-		public string Output { get; set; }
-
-		public override bool Execute()
-		{
-			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
-			var compiler = CompilerProvider.Instance.CCompiler;
-			compiler.Compile(Sources.First().ItemSpec, Output);
-			return true;
-		}
+		void LogMessage(string message, params object[] parameters);
+		void LogWarning(string message, params object[] parameters);
+		void LogError(string message, params object[] parameters);
 	}
 }
 

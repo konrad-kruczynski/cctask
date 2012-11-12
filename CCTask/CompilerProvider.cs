@@ -23,14 +23,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
+using CCTask.Compilers;
 
 namespace CCTask
 {
-	internal class CompilerProvider
+	internal sealed class CompilerProvider
 	{
 		internal static CompilerProvider Instance { get; private set; }
 
-		internal string CCompilerPath { get; private set; }
+		internal ICompiler CCompiler { get; private set; }
 
 		static CompilerProvider()
 		{
@@ -39,13 +40,16 @@ namespace CCTask
 
 		private CompilerProvider()
 		{
-			GetExecutables();
+			cCompilerPath = "cc"; // TODO: check existence
+			GetCompilers();
 		}
 
-		private void GetExecutables()
+		private void GetCompilers()
 		{
-			CCompilerPath = "gcc";
+			CCompiler = new GCC(cCompilerPath);
 		}
+
+		private readonly string cCompilerPath;
 	}
 }
 
