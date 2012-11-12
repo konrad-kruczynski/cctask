@@ -49,14 +49,16 @@ namespace CCTask
 			foreach(var source in Sources)
 			{
 				var objectFile = CToO(source.ItemSpec);
-				compiler.Compile(source.ItemSpec, objectFile);
+				if(!compiler.Compile(source.ItemSpec, objectFile))
+				{
+					return false;
+				}
 				objectFiles.Add(objectFile);
 			}
 
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			linker.Link(objectFiles, Output);
-			return true;
+			return linker.Link(objectFiles, Output);
 		}
 
 		private static string CToO(string source)

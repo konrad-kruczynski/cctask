@@ -58,7 +58,8 @@ namespace CCTask
 					Logger.Instance.LogWarning(line);
 				}
 			}
-			return true;
+			process.WaitForExit();
+			return process.ExitCode == 0;
 		}
 
 		private readonly ProcessStartInfo startInfo;
