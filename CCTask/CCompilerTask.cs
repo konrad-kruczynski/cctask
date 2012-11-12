@@ -26,6 +26,7 @@ using System;
 using System.Linq;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
+using System.IO;
 
 namespace CCTask
 {
@@ -41,8 +42,20 @@ namespace CCTask
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
 			var compiler = CompilerProvider.Instance.CCompiler;
-			compiler.Compile(Sources.First().ItemSpec, Output);
+			foreach(var source in Sources)
+			{
+				compiler.Compile(source.ItemSpec, CToO(source.ItemSpec));
+			}
 			return true;
+		}
+
+		private static string CToO(string source)
+		{
+			if(Path.GetExtension(source) == ".c")
+			{
+				return Path.GetDirectoryName(source) + Path.GetFileNameWithoutExtension(source) + ".o";
+			}
+			return source + ".o";
 		}
 	}
 }

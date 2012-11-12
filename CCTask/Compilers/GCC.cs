@@ -35,7 +35,8 @@ namespace CCTask.Compilers
 
 		public bool Compile(string source, string output)
 		{
-			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} -o {1}", source, output));
+			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} -c -o {1}", source, output));
+			Logger.Instance.LogMessage("CC {0}", output);
 			return runWrapper.Run();
 		}
 

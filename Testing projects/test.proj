@@ -5,7 +5,9 @@
    <UsingTask AssemblyFile="../CCTask/bin/Debug/CCTask.dll" TaskName="CCompilerTask"/>
 
    <ItemGroup>
-     <CSources Include="hello.c" />
+     <CSources Include="first.c" />
+     <CSources Include="second.c" />
+     <CSources Include="another.c" />
    </ItemGroup>
 
    <Target Name="All">
