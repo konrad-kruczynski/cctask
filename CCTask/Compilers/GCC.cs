@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */ 
 using System;
+using System.Linq;
 using System.IO;
 
 namespace CCTask.Compilers
@@ -36,7 +37,16 @@ namespace CCTask.Compilers
 
 		public bool Compile(string source, string output, string flags)
 		{
-			if(!Utilities.SourceHasChanged(source, output))
+			// let's get all dependencies
+			string gccOutput;
+			if(!Utilities.RunAndGetOutput(pathToGcc, string.Format("-MM {0}", source), out gccOutput))
+			{
+				Logger.Instance.LogError(gccOutput);
+				return false;
+			}
+			var sourceDirectory = Path.GetDirectoryName(source);
+			var dependencies = gccOutput.Trim().Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(x => Path.Combine(sourceDirectory, x));
+			if(!dependencies.Any(x => Utilities.SourceHasChanged(x, output)))
 			{
 				return true;
 			}
