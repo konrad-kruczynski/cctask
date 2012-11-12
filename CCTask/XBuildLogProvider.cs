@@ -32,24 +32,35 @@ namespace CCTask
 		public XBuildLogProvider(TaskLoggingHelper log)
 		{
 			this.log = log;
+			sync = new object();
 		}
 
 		public void LogMessage(string message, params object[] parameters)
 		{
-			log.LogMessage(message, parameters);
+			lock(sync)
+			{
+				log.LogMessage(message, parameters);
+			}
 		}
 
 		public void LogWarning(string message, params object[] parameters)
 		{
-			log.LogWarning(message, parameters);
+			lock(sync)
+			{
+				log.LogWarning(message, parameters);
+			}
 		}
 
 		public void LogError(string message, params object[] parameters)
 		{
-			log.LogError(message, parameters);
+			lock(sync)
+			{
+				log.LogError(message, parameters);
+			}
 		}
 
 		private readonly TaskLoggingHelper log;
+		private readonly object sync;
 	}
 }
 
