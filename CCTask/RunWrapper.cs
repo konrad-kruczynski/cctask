@@ -38,9 +38,8 @@ namespace CCTask
 			startInfo.RedirectStandardOutput = true;
 		}
 
-		internal bool Run ()
+		internal bool Run()
 		{
-			Logger.Instance.LogMessage("Going to run...");
 			var process = new Process { StartInfo = startInfo };
 			process.Start();
 			string line;
@@ -50,7 +49,14 @@ namespace CCTask
 			}
 			while((line = process.StandardError.ReadLine()) != null) 
 			{
-				Logger.Instance.LogWarning(line);
+				if(line.Contains("error"))
+				{
+					Logger.Instance.LogError(line);
+				}
+				else
+				{
+					Logger.Instance.LogWarning(line);
+				}
 			}
 			return true;
 		}
