@@ -36,6 +36,10 @@ namespace CCTask.Compilers
 
 		public bool Compile(string source, string output, string flags)
 		{
+			if(!Utilities.SourceHasChanged(source, output))
+			{
+				return true;
+			}
 			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} {2} -c -o {1}", source, output, flags));
 			Logger.Instance.LogMessage("CC {0}", Path.GetFileName(output));
 			return runWrapper.Run();

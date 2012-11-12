@@ -53,10 +53,6 @@ namespace CCTask
 			{
 				var objectFile = CToO(source.ItemSpec);
 				objectFiles.Add(objectFile);
-				if(!Utilities.SourceHasChanged(source.ItemSpec, objectFile))
-				{
-					continue;
-				}
 				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty))
 				{
 					return false;
@@ -64,11 +60,6 @@ namespace CCTask
 			}
 
 			// linking
-			if(!objectFiles.Any(x => Utilities.SourceHasChanged(x, Output)))
-			{
-				// everything is up to date
-				return true;
-			}
 			var linker = CompilerProvider.Instance.CLinker;
 			return linker.Link(objectFiles, Output, LFlags ?? string.Empty);
 		}

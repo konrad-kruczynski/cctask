@@ -36,8 +36,13 @@ namespace CCTask.Linkers
 			this.pathToLd = pathToLd;
 		}
 
-		public bool Link(IEnumerable<string> objectFiles, string outputFile, string flags)
+		public bool Link(IList<string> objectFiles, string outputFile, string flags)
 		{
+			if(!objectFiles.Any(x => Utilities.SourceHasChanged(x, outputFile)))
+			{
+				// everything is up to date
+				return true;
+			}
 			var runWrapper = new RunWrapper(pathToLd, string.Format("{0} {2} -o {1}", objectFiles.Aggregate((x, y) => x + " " + y), outputFile, flags));
 			Logger.Instance.LogMessage("LD {0}", Path.GetFileName(outputFile));
 			return runWrapper.Run();
