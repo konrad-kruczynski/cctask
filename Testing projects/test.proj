@@ -2,7 +2,7 @@
 <Project DefaultTargets="All" 
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-   <UsingTask AssemblyFile="CCTask.dll" TaskName="CCompiler"/>
+   <UsingTask AssemblyFile="../CCTask/bin/Debug/CCTask.dll" TaskName="CCompilerTask"/>
 
    <ItemGroup>
      <CSources Include="first.c" />
@@ -11,7 +11,7 @@
    </ItemGroup>
 
    <Target Name="All">
-     <CCompiler Sources="@(CSources)" />
+     <CCompilerTask Sources="@(CSources)" Output="output" />
    </Target>
 
 </Project>
