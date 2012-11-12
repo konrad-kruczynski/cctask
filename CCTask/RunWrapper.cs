@@ -52,7 +52,7 @@ namespace CCTask
 			{
 				log.LogWarning(line);
 			}
-
+			return true;
 		}
 
 		private readonly ProcessStartInfo startInfo;
