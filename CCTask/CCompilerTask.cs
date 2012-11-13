@@ -39,6 +39,8 @@ namespace CCTask
 		[Required]
 		public ITaskItem[] Sources { get; set; }
 
+		public ITaskItem[] SourceDirectories { get; set; }
+
 		[Required]
 		public string Output { get; set; }
 
@@ -58,22 +60,30 @@ namespace CCTask
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
 			var objectFiles = new List<string>();
 
-			buildDirectory = Path.Combine(Path.GetDirectoryName(Output), BuildDirectoryName + "_" + Path.GetFileName(Output));
+			var buildPath = Path.GetDirectoryName(Output);
+			buildPath = buildPath == string.Empty ? Directory.GetCurrentDirectory() : Path.GetFullPath(buildPath);
+			buildDirectory = Path.Combine(buildPath, BuildDirectoryName + "_" + Path.GetFileName(Output));
 			Directory.CreateDirectory(buildDirectory);
 			hashDbFile = Path.Combine(buildDirectory, HashDbFilename);
 
 			LoadHashes();
 
 			// compilation
-			var compiler = CompilerProvider.Instance.CCompiler;
-			var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources, (source, loopState) =>
+			if(SourceDirectories == null) 
 			{
-				var objectFile = CToO(source.ItemSpec);
+				SourceDirectories = new ITaskItem[0];
+			}
+			var allSources = Sources.Select(x => x.ItemSpec).Union(SourceDirectories.SelectMany(x => Directory.GetFiles(x.ItemSpec).Where(y => Path.GetExtension(y) == ".c")));
+			allSources = allSources.Select(x => Path.GetFullPath(x));
+			var compiler = CompilerProvider.Instance.CCompiler;
+			var compilationResult = System.Threading.Tasks.Parallel.ForEach(allSources, (source, loopState) =>
+			{
+				var objectFile = CToO(source);
 				lock(objectFiles)
 				{
 					objectFiles.Add(objectFile);
 				}
-				if(!compiler.Compile(source.ItemSpec, objectFile, CFlags ?? string.Empty, SourceHasChanged))
+				if(!compiler.Compile(source, objectFile, CFlags ?? string.Empty, SourceHasChanged))
 				{
 					loopState.Break();
 				}
@@ -86,7 +96,7 @@ namespace CCTask
 
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			var result = linker.Link(objectFiles, Output, LFlags ?? string.Empty, SourceHasChanged);
+			var result = linker.Link(objectFiles, Path.Combine(buildPath, Output), LFlags ?? string.Empty, SourceHasChanged);
 			SaveHashes();
 			return result;
 		}

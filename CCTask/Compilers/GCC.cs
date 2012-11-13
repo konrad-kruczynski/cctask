@@ -40,7 +40,7 @@ namespace CCTask.Compilers
 		{
 			// let's get all dependencies
 			string gccOutput;
-			if(!Utilities.RunAndGetOutput(pathToGcc, string.Format("-MM {0}", source), out gccOutput))
+			if(!Utilities.RunAndGetOutput(pathToGcc, string.Format("-MM \"{0}\"", source), out gccOutput))
 			{
 				Logger.Instance.LogError(gccOutput);
 				return false;
@@ -51,7 +51,7 @@ namespace CCTask.Compilers
 			{
 				return true;
 			}
-			var runWrapper = new RunWrapper(pathToGcc, string.Format("{0} {2} -c -o {1}", source, output, flags));
+			var runWrapper = new RunWrapper(pathToGcc, string.Format("\"{0}\" {2} -c -o \"{1}\"", source, output, flags));
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
 			return runWrapper.Run();
 		}
