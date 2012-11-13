@@ -26,6 +26,7 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
+using System.Text;
 
 namespace CCTask.Compilers
 {
@@ -45,8 +46,11 @@ namespace CCTask.Compilers
 				Logger.Instance.LogError(gccOutput);
 				return false;
 			}
-			var sourceDirectory = Path.GetDirectoryName(source);
-			var dependencies = gccOutput.Trim().Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(x => Path.Combine(sourceDirectory, x));
+			var dependencies = ParseGccMmOutput(gccOutput);
+			foreach(var dep in dependencies)
+			{
+				Console.WriteLine("Dep {0}", dep);
+			}
 			if(!sourceHasChanged(dependencies, output))
 			{
 				return true;
@@ -54,6 +58,46 @@ namespace CCTask.Compilers
 			var runWrapper = new RunWrapper(pathToGcc, string.Format("\"{0}\" {2} -c -o \"{1}\"", source, output, flags));
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
 			return runWrapper.Run();
+		}
+
+		private static IEnumerable<string> ParseGccMmOutput(string gccOutput)
+		{
+			var dependency = new StringBuilder();
+			for(var i = 0; i < gccOutput.Length; i++)
+			{
+				var finished = false;
+				if(gccOutput[i] == '\\')
+				{
+					i++;
+					if(gccOutput[i] == ' ')
+					{
+						continue;
+					}
+					else
+					{
+						// new line
+						finished = true;
+					}
+				}
+				else if(gccOutput[i] == ' ')
+				{
+					finished = true;
+				}
+				else if(gccOutput[i] == ':')
+				{
+					dependency = new StringBuilder();
+				}
+				else
+				{
+					dependency.Append(gccOutput[i]);
+				}
+				if(finished)
+				{
+					yield return dependency.ToString();
+					dependency = new StringBuilder();
+				}
+			}
+			yield return dependency.ToString();
 		}
 
 		private readonly string pathToGcc;
