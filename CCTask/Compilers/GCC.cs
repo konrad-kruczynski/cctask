@@ -47,10 +47,6 @@ namespace CCTask.Compilers
 				return false;
 			}
 			var dependencies = ParseGccMmOutput(gccOutput);
-			foreach(var dep in dependencies)
-			{
-				Console.WriteLine("Dep {0}", dep);
-			}
 			if(!sourceHasChanged(dependencies, output))
 			{
 				return true;
@@ -71,6 +67,7 @@ namespace CCTask.Compilers
 					i++;
 					if(gccOutput[i] == ' ')
 					{
+						dependency.Append(' ');
 						continue;
 					}
 					else
@@ -78,6 +75,10 @@ namespace CCTask.Compilers
 						// new line
 						finished = true;
 					}
+				}
+				else if(char.IsControl(gccOutput[i]))
+				{
+					continue;
 				}
 				else if(gccOutput[i] == ' ')
 				{
@@ -93,11 +94,17 @@ namespace CCTask.Compilers
 				}
 				if(finished)
 				{
-					yield return dependency.ToString();
+					if(dependency.Length > 0)
+					{
+						yield return dependency.ToString();
+					}
 					dependency = new StringBuilder();
 				}
 			}
-			yield return dependency.ToString();
+			if(dependency.Length > 0)
+			{
+				yield return dependency.ToString();
+			}
 		}
 
 		private readonly string pathToGcc;
