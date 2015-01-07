@@ -41,12 +41,13 @@ namespace CCTask
 
 		public ITaskItem[] SourceDirectories { get; set; }
 
-		[Required]
 		public string Output { get; set; }
 
 		public string Flags  { get; set; }
 		public string CFlags { get; set; }
 		public string LFlags { get; set; }
+
+		public bool Link { get; set; }
 
 		public bool PutObjectFilesWhereSources { get; set; }
 
@@ -95,11 +96,16 @@ namespace CCTask
 				return false;
 			}
 
-			// linking
-			var linker = CompilerProvider.Instance.CLinker;
-			var result = linker.Link(objectFiles, Path.Combine(buildPath, Output), LFlags ?? string.Empty, SourceHasChanged);
-			SaveHashes();
-			return result;
+
+			if (Link)
+			{
+				// linking
+				var linker = CompilerProvider.Instance.CLinker;
+				var result = linker.Link(objectFiles, Path.Combine(buildPath, Output), LFlags ?? string.Empty, SourceHasChanged);
+				SaveHashes();
+				return result;
+			}
+			return true;
 		}
 
 		private void LoadHashes()
