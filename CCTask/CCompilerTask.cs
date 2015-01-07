@@ -44,6 +44,7 @@ namespace CCTask
 		[Required]
 		public string Output { get; set; }
 
+		public string Flags  { get; set; }
 		public string CFlags { get; set; }
 		public string LFlags { get; set; }
 
@@ -83,7 +84,7 @@ namespace CCTask
 				{
 					objectFiles.Add(objectFile);
 				}
-				if(!compiler.Compile(source, objectFile, CFlags ?? string.Empty, SourceHasChanged))
+				if(!compiler.Compile(source, objectFile, Flags ?? string.Empty, CFlags ?? string.Empty, SourceHasChanged))
 				{
 					loopState.Break();
 				}

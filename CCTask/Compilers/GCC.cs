@@ -37,11 +37,11 @@ namespace CCTask.Compilers
 			this.pathToGcc = pathToGcc;
 		}
 
-		public bool Compile(string source, string output, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
+		public bool Compile(string source, string output, string flags, string cflags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
 		{
 			// let's get all dependencies
 			string gccOutput;
-			if(!Utilities.RunAndGetOutput(pathToGcc, string.Format("-MM \"{0}\"", source), out gccOutput))
+			if(!Utilities.RunAndGetOutput(pathToGcc, string.Format("{1} -MM \"{0}\"", source, flags), out gccOutput))
 			{
 				Logger.Instance.LogError(gccOutput);
 				return false;
@@ -51,7 +51,7 @@ namespace CCTask.Compilers
 			{
 				return true;
 			}
-			var runWrapper = new RunWrapper(pathToGcc, string.Format("\"{0}\" {2} -c -o \"{1}\"", source, output, flags));
+			var runWrapper = new RunWrapper(pathToGcc, string.Format("\"{0}\" {2} {3} -c -o \"{1}\"", source, output, flags, cflags));
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
 			return runWrapper.Run();
 		}
