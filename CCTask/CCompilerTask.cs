@@ -43,6 +43,9 @@ namespace CCTask
 
 		public string Output { get; set; }
 
+		[Output]
+		public ITaskItem[] Outputs { get; set; }
+
 		public string Flags  { get; set; }
 		public string CFlags { get; set; }
 		public string LFlags { get; set; }
@@ -96,6 +99,7 @@ namespace CCTask
 				return false;
 			}
 
+			Outputs = objectFiles.Select(x => new TaskItem(x)).ToArray();
 
 			if (Link)
 			{
