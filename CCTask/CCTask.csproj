@@ -48,6 +48,7 @@
     <Compile Include="ILogProvider.cs" />
     <Compile Include="XBuildLogProvider.cs" />
     <Compile Include="Utilities.cs" />
+    <Compile Include="CLinkerTask.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
