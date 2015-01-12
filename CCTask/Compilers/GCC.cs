@@ -48,7 +48,7 @@ namespace CCTask.Compilers
 				return false;
 			}
 			var dependencies = ParseGccMmOutput(gccOutput);
-			if(!sourceHasChanged(dependencies, output))
+			if(!sourceHasChanged(dependencies.Union(new [] { source }), output))
 			{
 				return true;
 			}
