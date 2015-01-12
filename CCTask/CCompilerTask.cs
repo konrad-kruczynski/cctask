@@ -56,8 +56,6 @@ namespace CCTask
 
 		public CCompilerTask()
 		{
-			hasherSource = new ThreadLocal<MD5>(() => MD5.Create());
-			hashDb = new Dictionary<string, string>();
 		}
 
 		public override bool Execute()
@@ -69,9 +67,7 @@ namespace CCTask
 			buildPath = buildPath == string.Empty ? Directory.GetCurrentDirectory() : Path.GetFullPath(buildPath);
 			buildDirectory = Path.Combine(buildPath, BuildDirectoryName + "_" + Path.GetFileName(Output));
 			Directory.CreateDirectory(buildDirectory);
-			hashDbFile = Path.Combine(buildDirectory, HashDbFilename);
 
-			LoadHashes();
 
 			// compilation
 			if(SourceDirectories == null) 
@@ -93,7 +89,6 @@ namespace CCTask
 					loopState.Break();
 				}
 			});
-			SaveHashes();
 			if(compilationResult.LowestBreakIteration != null)
 			{
 				return false;
@@ -106,95 +101,15 @@ namespace CCTask
 				// linking
 				var linker = CompilerProvider.Instance.CLinker;
 				var result = linker.Link(objectFiles, Path.Combine(buildPath, Output), LFlags ?? string.Empty, SourceHasChanged);
-				SaveHashes();
 				return result;
 			}
-			return true;
-		}
 
-		private void LoadHashes()
-		{
-			if(!File.Exists(hashDbFile))
-			{
-				return;
-			}
-			foreach(var line in File.ReadLines(hashDbFile))
-			{
-				var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-				hashDb.Add(fileAndHash[0], fileAndHash[1]);
-			}
-		}
 
-		private void SaveHashes()
-		{
-			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1}", x.Key, x.Value)));
-		}
-
-		private string CToO(string source)
-		{
-			if(PutObjectFilesWhereSources)
-			{
-				if(Path.GetExtension(source) == ".c")
-				{
-					return Path.GetDirectoryName(source) + Path.GetFileNameWithoutExtension(source) + ".o";
-				}
-				return source + ".o";
-			}
-			var hash = CalculateMD5(source);
-			return Path.Combine(buildDirectory, hash + ".o");
-		}
-
-		private bool SourceHasChanged(IEnumerable<string> sources, string outputPath)
-		{
-			var changed = false;
-			foreach(var source in sources) 
-			{
-				changed = changed | SourceHasChanged(source, outputPath);
-			}
-			return changed;
-		}
-
-		private bool SourceHasChanged(string sourcePath, string outputPath)
-		{
-			if(!File.Exists(sourcePath))
-			{
 				return true;
 			}
-			string hash;
-			using(var stream = File.OpenRead(sourcePath))
-			{
-				var hasher = hasherSource.Value;
-				hash = BitConverter.ToString(hasher.ComputeHash(stream));
-			}
-
-			var result = false;
-			if(!hashDb.ContainsKey(sourcePath))
-			{
-				result = true;
-			}
-			else
-			{
-				result = hashDb[sourcePath] != hash;
-			}
-			if(result)
-			{
-				hashDb[sourcePath] = hash;
-			}
-			return result;
-		}
-
-		private string CalculateMD5(string s)
-		{
-			var md5 = hasherSource.Value;
-			return BitConverter.ToString(md5.ComputeHash(Encoding.UTF8.GetBytes(s))).ToLower().Replace("-", "");
 		}
 
 		private string buildDirectory;
-		private string hashDbFile;
-		private readonly Dictionary<string, string> hashDb;
-		private readonly ThreadLocal<MD5> hasherSource;
-		private const string BuildDirectoryName = "buildcache";
-		private const string HashDbFilename = "hashes";
 	}
 }
 
