@@ -49,6 +49,7 @@
     <Compile Include="XBuildLogProvider.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="CLinkerTask.cs" />
+    <Compile Include="FileCacheManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
