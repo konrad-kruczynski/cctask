@@ -52,6 +52,7 @@ namespace CCTask.Compilers
 			{
 				return true;
 			}
+
 			var ccargs = string.Format("\"{0}\" {2} {3} -c -o \"{1}\"", source, output, flags, cflags);
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
 

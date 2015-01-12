@@ -26,7 +26,6 @@ using System;
 using System.Linq;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
-using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -57,14 +56,14 @@ namespace CCTask
 				var compilationFlags = CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
 				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), (source, loopState) => {
 					var objectFile = regex.Replace(source, ".o");
-					lock (objectFiles)
-					{
-						objectFiles.Add(objectFile);
-					}
-
 					if (!compiler.Compile(source, objectFile, configurationFlags, compilationFlags, cache.SourceHasChanged))
 					{
 						loopState.Break();
+					}
+
+					lock(objectFiles)
+					{
+						objectFiles.Add(objectFile);
 					}
 				});
 				if (compilationResult.LowestBreakIteration != null)
@@ -72,7 +71,7 @@ namespace CCTask
 					return false;
 				}
 
-				ObjectFiles = objectFiles.Select(x => new TaskItem(x)).ToArray();
+				ObjectFiles = objectFiles.Any() ? objectFiles.Select(x => new TaskItem(x)).ToArray() : new TaskItem[0];
 
 				return true;
 			}
