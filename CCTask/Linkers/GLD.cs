@@ -36,7 +36,7 @@ namespace CCTask.Linkers
 			this.pathToLd = pathToLd;
 		}
 
-		public bool Link(IList<string> objectFiles, string outputFile, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
+		public bool Link(IEnumerable<string> objectFiles, string outputFile, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
 		{
 			if(!sourceHasChanged(objectFiles, outputFile))
 			{

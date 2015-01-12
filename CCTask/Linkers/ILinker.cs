@@ -29,7 +29,7 @@ namespace CCTask.Linkers
 {
 	internal interface ILinker
 	{
-		bool Link(IList<string> objectFiles, string outputFile, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged);
+		bool Link(IEnumerable<string> objectFiles, string outputFile, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged);
 	}
 }
 
