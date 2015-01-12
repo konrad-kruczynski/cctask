@@ -55,7 +55,7 @@ namespace CCTask
 				var regex = new Regex(@"\.c$");
 				var configurationFlags = ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
 				var compilationFlags = CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
-				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => Path.GetFullPath(x.ItemSpec)), (source, loopState) => {
+				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), (source, loopState) => {
 					var objectFile = regex.Replace(source, ".o");
 					lock (objectFiles)
 					{

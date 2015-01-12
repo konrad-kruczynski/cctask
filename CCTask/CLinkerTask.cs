@@ -20,12 +20,11 @@ namespace CCTask
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically; this put in constructor causes NRE 
 
-			var buildPath = Path.GetDirectoryName(Output);
-			buildPath = buildPath == string.Empty ? Directory.GetCurrentDirectory() : Path.GetFullPath(buildPath);
-			var ofiles = ObjectFiles.Select(x => Path.GetFullPath(x.ItemSpec));
+
+			var ofiles = ObjectFiles.Select(x => x.ItemSpec);
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			return linker.Link(ofiles, Path.Combine(buildPath, Output), Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)), (x, y) => true);
+			return linker.Link(ofiles, Output, Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)), (x, y) => true);
 		}
 	}
 }
