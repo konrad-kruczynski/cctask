@@ -13,7 +13,7 @@ namespace CCTask
 		public FileCacheManager(string directory = null)
 		{
 			hasherSource = new ThreadLocal<MD5>(() => MD5.Create());
-			hashDb = new Dictionary<string, string>();
+			hashDb = new Dictionary<string, Tuple<string, string>>();
 
 			hashDbFile = Path.Combine(directory ?? Directory.GetCurrentDirectory(), HashDbFilename);
 			Load();
@@ -33,26 +33,27 @@ namespace CCTask
 			foreach(var line in File.ReadLines(hashDbFile))
 			{
 				var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-				hashDb.Add(fileAndHash[0], fileAndHash[1]);
+				hashDb.Add(fileAndHash[0], Tuple.Create(fileAndHash[1], fileAndHash[2]));
 			}
 		}
 
 		private void Save()
 		{
-			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1}", x.Key, x.Value)));
+			Directory.CreateDirectory(Path.GetDirectoryName(hashDbFile));
+			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1};{2}", x.Key, x.Value.Item1, x.Value.Item2)));
 		}
 
-		public bool SourceHasChanged(IEnumerable<string> sources)
+		public bool SourceHasChanged(IEnumerable<string> sources, string args)
 		{
 			var changed = false;
 			foreach(var source in sources) 
 			{
-				changed = changed | SourceHasChanged(source);
+				changed = changed | SourceHasChanged(source, args);
 			}
 			return changed;
 		}
 
-		private bool SourceHasChanged(string sourcePath)
+		private bool SourceHasChanged(string sourcePath, string args)
 		{
 			if(!File.Exists(sourcePath))
 			{
@@ -72,11 +73,11 @@ namespace CCTask
 			}
 			else
 			{
-				result = hashDb[sourcePath] != hash;
+				result = (hashDb[sourcePath].Item1 != hash || hashDb[sourcePath].Item2 != args);
 			}
 			if(result)
 			{
-				hashDb[sourcePath] = hash;
+				hashDb[sourcePath] = Tuple.Create(hash, args);
 			}
 			return result;
 		}
@@ -88,7 +89,7 @@ namespace CCTask
 		}
 
 		private readonly ThreadLocal<MD5> hasherSource;
-		private readonly Dictionary<string, string> hashDb;
+		private readonly Dictionary<string, Tuple<string, string>> hashDb;
 		private readonly string hashDbFile;
 		private const string HashDbFilename = "hashes";
 	}

@@ -37,7 +37,7 @@ namespace CCTask.Compilers
 			this.pathToGcc = pathToGcc;
 		}
 
-		public bool Compile(string source, string output, string flags, string cflags, Func<IEnumerable<string>, bool> sourceHasChanged)
+		public bool Compile(string source, string output, string flags, string cflags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
 		{
 			// let's get all dependencies
 			string gccOutput;
@@ -48,7 +48,7 @@ namespace CCTask.Compilers
 				return false;
 			}
 			var dependencies = ParseGccMmOutput(gccOutput).Union(new [] { source });
-			if(!sourceHasChanged(dependencies) && File.Exists(output))
+			if(!sourceHasChanged(dependencies, string.Format("{0} {1}", flags, cflags)) && File.Exists(output))
 			{
 				return true;
 			}
