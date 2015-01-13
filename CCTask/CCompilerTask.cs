@@ -48,7 +48,7 @@ namespace CCTask
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
 
-			using (var cache = new FileCacheManager())
+			using (var cache = new FileCacheManager(ObjectFilesDirectory))
 			{
 				var objectFiles = new List<string>();
 
