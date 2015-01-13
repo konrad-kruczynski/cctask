@@ -42,17 +42,17 @@ namespace CCTask
 			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1}", x.Key, x.Value)));
 		}
 
-		public bool SourceHasChanged(IEnumerable<string> sources, string outputPath)
+		public bool SourceHasChanged(IEnumerable<string> sources)
 		{
 			var changed = false;
 			foreach(var source in sources) 
 			{
-				changed = changed | SourceHasChanged(source, outputPath);
+				changed = changed | SourceHasChanged(source);
 			}
 			return changed;
 		}
 
-		private bool SourceHasChanged(string sourcePath, string outputPath)
+		private bool SourceHasChanged(string sourcePath)
 		{
 			if(!File.Exists(sourcePath))
 			{
