@@ -24,6 +24,22 @@ namespace CCTask
 			Save();
 		}
 
+		public bool SourceHasChanged(IEnumerable<string> sources, string args)
+		{
+			var changed = false;
+			foreach(var source in sources) 
+			{
+				changed = changed | SourceHasChanged(source, args);
+			}
+			return changed;
+		}
+
+		private string CalculateMD5(string s)
+		{
+			var md5 = hasherSource.Value;
+			return BitConverter.ToString(md5.ComputeHash(Encoding.UTF8.GetBytes(s))).ToLower().Replace("-", "");
+		}
+
 		private void Load()
 		{
 			if(!File.Exists(hashDbFile))
@@ -41,16 +57,6 @@ namespace CCTask
 		{
 			Directory.CreateDirectory(Path.GetDirectoryName(hashDbFile));
 			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1};{2}", x.Key, x.Value.Item1, x.Value.Item2)));
-		}
-
-		public bool SourceHasChanged(IEnumerable<string> sources, string args)
-		{
-			var changed = false;
-			foreach(var source in sources) 
-			{
-				changed = changed | SourceHasChanged(source, args);
-			}
-			return changed;
 		}
 
 		private bool SourceHasChanged(string sourcePath, string args)
@@ -82,15 +88,10 @@ namespace CCTask
 			return result;
 		}
 
-		private string CalculateMD5(string s)
-		{
-			var md5 = hasherSource.Value;
-			return BitConverter.ToString(md5.ComputeHash(Encoding.UTF8.GetBytes(s))).ToLower().Replace("-", "");
-		}
-
-		private readonly ThreadLocal<MD5> hasherSource;
 		private readonly Dictionary<string, Tuple<string, string>> hashDb;
 		private readonly string hashDbFile;
+		private readonly ThreadLocal<MD5> hasherSource;
+
 		private const string HashDbFilename = "hashes";
 	}
 }
