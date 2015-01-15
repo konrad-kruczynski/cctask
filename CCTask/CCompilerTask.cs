@@ -54,9 +54,10 @@ namespace CCTask
 
 				var compiler = CompilerProvider.Instance.CCompiler;
 				var regex = new Regex(@"\.c$");
-				var configurationFlags = ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
-				var compilationFlags = CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
-				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), (source, loopState) => {
+				var configurationFlags = (ConfigurationFlags != null && ConfigurationFlags.Any()) ? ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
+				var compilationFlags = (CompilationFlags != null && CompilationFlags.Any()) ? CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
+				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), (source, loopState) => 
+				{
 					var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
 					if (!compiler.Compile(source, objectFile, configurationFlags, compilationFlags, cache.SourceHasChanged))
 					{

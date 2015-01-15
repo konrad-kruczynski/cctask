@@ -26,7 +26,8 @@ namespace CCTask
 			var ofiles = ObjectFiles.Select(x => x.ItemSpec);
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			return linker.Link(ofiles, Output, Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)), (x, y) => true);
+			var flags = (Flags != null && Flags.Any()) ? Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
+			return linker.Link(ofiles, Output, flags, (x, y) => true);
 		}
 	}
 }
