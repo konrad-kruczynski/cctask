@@ -43,7 +43,8 @@ namespace CCTask.Linkers
 				// everything is up to date
 				return true;
 			}
-			var runWrapper = new RunWrapper(pathToLd, string.Format("{0} {2} -o \"{1}\"", objectFiles.Select(x => "\"" + x + "\"").Aggregate((x, y) => x + " " + y), outputFile, flags));
+			var linkerArguments = string.Format("{0} {2} -o \"{1}\"", objectFiles.Select(x => "\"" + x + "\"").Aggregate((x, y) => x + " " + y), outputFile, flags);
+			var runWrapper = new RunWrapper(pathToLd, linkerArguments);
 			Logger.Instance.LogMessage("LD: {0}", Path.GetFileName(outputFile));
 			return runWrapper.Run();
 		}
