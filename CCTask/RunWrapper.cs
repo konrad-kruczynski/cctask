@@ -47,7 +47,7 @@ namespace CCTask
 			{
 				Logger.Instance.LogMessage(line);
 			}
-			while((line = process.StandardError.ReadLine()) != null) 
+			while((line = process.StandardError.ReadLine()) != null)
 			{
 				if(line.Contains("error"))
 				{

@@ -41,18 +41,30 @@ namespace CCTask.Compilers
 		{
 			// let's get all dependencies
 			string gccOutput;
-			if(!Utilities.RunAndGetOutput(pathToGcc, string.Format("-MM \"{0}\"", source), out gccOutput))
+			var mmargs = string.Format("{1} -MM \"{0}\"", source, flags);
+			#if DEBUG
+			Logger.Instance.LogMessage("MM: {0} ({1})", Path.GetFileName(source), mmargs);
+			#endif
+			if(!Utilities.RunAndGetOutput(pathToGcc, mmargs, out gccOutput))
 			{
 				Logger.Instance.LogError(gccOutput);
 				return false;
 			}
-			var dependencies = ParseGccMmOutput(gccOutput);
-			if(!sourceHasChanged(dependencies, output))
+			var dependencies = ParseGccMmOutput(gccOutput).Union(new [] { source });
+			if(!sourceHasChanged(dependencies, flags) && File.Exists(output))
 			{
 				return true;
 			}
-			var runWrapper = new RunWrapper(pathToGcc, string.Format("\"{0}\" {2} -c -o \"{1}\"", source, output, flags));
+
+			Directory.CreateDirectory(Path.GetDirectoryName(output));
+
+			var ccargs = string.Format("\"{0}\" {2} -c -o \"{1}\"", source, output, flags);
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
+			#if DEBUG
+			Logger.Instance.LogMessage("output: {0} flags: {1}", output, ccargs);
+			#endif
+
+			var runWrapper = new RunWrapper(pathToGcc, ccargs);
 			return runWrapper.Run();
 		}
 
