@@ -37,7 +37,7 @@ namespace CCTask.Compilers
 			this.pathToGcc = pathToGcc;
 		}
 
-		public bool Compile(string source, string output, string flags, string cflags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
+		public bool Compile(string source, string output, string flags, Func<IEnumerable<string>, string, bool> sourceHasChanged)
 		{
 			// let's get all dependencies
 			string gccOutput;
@@ -51,14 +51,14 @@ namespace CCTask.Compilers
 				return false;
 			}
 			var dependencies = ParseGccMmOutput(gccOutput).Union(new [] { source });
-			if(!sourceHasChanged(dependencies, string.Format("{0} {1}", flags, cflags)) && File.Exists(output))
+			if(!sourceHasChanged(dependencies, flags) && File.Exists(output))
 			{
 				return true;
 			}
 
 			Directory.CreateDirectory(Path.GetDirectoryName(output));
 
-			var ccargs = string.Format("\"{0}\" {2} {3} -c -o \"{1}\"", source, output, flags, cflags);
+			var ccargs = string.Format("\"{0}\" {2} -c -o \"{1}\"", source, output, flags);
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
 			#if DEBUG
 			Logger.Instance.LogMessage("output: {0} flags: {1}", output, ccargs);

@@ -42,8 +42,7 @@ namespace CCTask
 
 		public string ObjectFilesDirectory { get; set; }
 
-		public ITaskItem[] CompilationFlags   { get; set; }
-		public ITaskItem[] ConfigurationFlags { get; set; }
+		public ITaskItem[] Flags   { get; set; }
 
 		public bool Parallel { get; set; }
 
@@ -58,15 +57,14 @@ namespace CCTask
 		public override bool Execute()
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
-			var configurationFlags = (ConfigurationFlags != null && ConfigurationFlags.Any()) ? ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
-			var	compilationFlags = (CompilationFlags != null && CompilationFlags.Any()) ? CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
+			var flags = (Flags != null && Flags.Any()) ? Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
 
 			using (var cache = new FileCacheManager(ObjectFilesDirectory))
 			{
 				var objectFiles = new List<string>();
 				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) => {
 					var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
-					if (!compiler.Compile(source, objectFile, configurationFlags, compilationFlags, cache.SourceHasChanged))
+					if (!compiler.Compile(source, objectFile, flags, cache.SourceHasChanged))
 					{
 						loopState.Break();
 					}
