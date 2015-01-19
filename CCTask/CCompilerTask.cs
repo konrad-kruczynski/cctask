@@ -28,6 +28,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using CCTask.Compilers;
 
 namespace CCTask
 {
@@ -44,20 +45,26 @@ namespace CCTask
 		public ITaskItem[] CompilationFlags   { get; set; }
 		public ITaskItem[] ConfigurationFlags { get; set; }
 
+		public bool Parallel { get; set; }
+
+		public CCompilerTask()
+		{
+			compiler = CompilerProvider.Instance.CCompiler;
+			regex = new Regex(@"\.c$");
+
+			Parallel = true;
+		}
+
 		public override bool Execute()
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
+			var configurationFlags = (ConfigurationFlags != null && ConfigurationFlags.Any()) ? ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
+			var	compilationFlags = (CompilationFlags != null && CompilationFlags.Any()) ? CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
 
 			using (var cache = new FileCacheManager(ObjectFilesDirectory))
 			{
 				var objectFiles = new List<string>();
-
-				var compiler = CompilerProvider.Instance.CCompiler;
-				var regex = new Regex(@"\.c$");
-				var configurationFlags = (ConfigurationFlags != null && ConfigurationFlags.Any()) ? ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
-				var compilationFlags = (CompilationFlags != null && CompilationFlags.Any()) ? CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
-				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), (source, loopState) => 
-				{
+				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) => {
 					var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
 					if (!compiler.Compile(source, objectFile, configurationFlags, compilationFlags, cache.SourceHasChanged))
 					{
@@ -79,6 +86,9 @@ namespace CCTask
 				return true;
 			}
 		}
+
+		private readonly Regex regex;
+		private readonly ICompiler compiler;
 	}
 }
 
