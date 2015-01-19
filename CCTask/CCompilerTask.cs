@@ -28,9 +28,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Build.Framework;
 using System.IO;
 using System.Collections.Generic;
-using System.Threading;
-using System.Security.Cryptography;
-using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CCTask
 {
@@ -39,77 +37,46 @@ namespace CCTask
 		[Required]
 		public ITaskItem[] Sources { get; set; }
 
-		public ITaskItem[] SourceDirectories { get; set; }
-
-		public string Output { get; set; }
-
 		[Output]
-		public ITaskItem[] Outputs { get; set; }
+		public ITaskItem[] ObjectFiles { get; set; }
 
-		public string Flags  { get; set; }
-		public string CFlags { get; set; }
-		public string LFlags { get; set; }
-
-		public bool Link { get; set; }
-
-		public bool PutObjectFilesWhereSources { get; set; }
-
-		public CCompilerTask()
-		{
-		}
+		public ITaskItem[] CompilationFlags   { get; set; }
+		public ITaskItem[] ConfigurationFlags { get; set; }
 
 		public override bool Execute()
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
-			var objectFiles = new List<string>();
 
-			var buildPath = Path.GetDirectoryName(Output);
-			buildPath = buildPath == string.Empty ? Directory.GetCurrentDirectory() : Path.GetFullPath(buildPath);
-			buildDirectory = Path.Combine(buildPath, BuildDirectoryName + "_" + Path.GetFileName(Output));
-			Directory.CreateDirectory(buildDirectory);
-
-
-			// compilation
-			if(SourceDirectories == null) 
+			using (var cache = new FileCacheManager())
 			{
-				SourceDirectories = new ITaskItem[0];
-			}
-			var allSources = Sources.Select(x => x.ItemSpec).Union(SourceDirectories.SelectMany(x => Directory.GetFiles(x.ItemSpec).Where(y => Path.GetExtension(y) == ".c")));
-			allSources = allSources.Select(x => Path.GetFullPath(x));
-			var compiler = CompilerProvider.Instance.CCompiler;
-			var compilationResult = System.Threading.Tasks.Parallel.ForEach(allSources, (source, loopState) =>
-			{
-				var objectFile = CToO(source);
-				lock(objectFiles)
+				var objectFiles = new List<string>();
+
+				var compiler = CompilerProvider.Instance.CCompiler;
+				var regex = new Regex(@"\.c$");
+				var configurationFlags = ConfigurationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
+				var compilationFlags = CompilationFlags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec));
+				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => Path.GetFullPath(x.ItemSpec)), (source, loopState) => {
+					var objectFile = regex.Replace(source, ".o");
+					lock (objectFiles)
+					{
+						objectFiles.Add(objectFile);
+					}
+
+					if (!compiler.Compile(source, objectFile, configurationFlags, compilationFlags, cache.SourceHasChanged))
+					{
+						loopState.Break();
+					}
+				});
+				if (compilationResult.LowestBreakIteration != null)
 				{
-					objectFiles.Add(objectFile);
+					return false;
 				}
-				if(!compiler.Compile(source, objectFile, Flags ?? string.Empty, CFlags ?? string.Empty, SourceHasChanged))
-				{
-					loopState.Break();
-				}
-			});
-			if(compilationResult.LowestBreakIteration != null)
-			{
-				return false;
-			}
 
-			Outputs = objectFiles.Select(x => new TaskItem(x)).ToArray();
-
-			if (Link)
-			{
-				// linking
-				var linker = CompilerProvider.Instance.CLinker;
-				var result = linker.Link(objectFiles, Path.Combine(buildPath, Output), LFlags ?? string.Empty, SourceHasChanged);
-				return result;
-			}
-
+				ObjectFiles = objectFiles.Select(x => new TaskItem(x)).ToArray();
 
 				return true;
 			}
 		}
-
-		private string buildDirectory;
 	}
 }
 
