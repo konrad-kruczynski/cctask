@@ -42,6 +42,9 @@ namespace CCTask.Compilers
 			// let's get all dependencies
 			string gccOutput;
 			var mmargs = string.Format("{1} -MM \"{0}\"", source, flags);
+			#if DEBUG
+			Logger.Instance.LogMessage("MM: {0} ({1})", Path.GetFileName(source), mmargs);
+			#endif
 			if(!Utilities.RunAndGetOutput(pathToGcc, mmargs, out gccOutput))
 			{
 				Logger.Instance.LogError(gccOutput);
@@ -57,6 +60,9 @@ namespace CCTask.Compilers
 
 			var ccargs = string.Format("\"{0}\" {2} {3} -c -o \"{1}\"", source, output, flags, cflags);
 			Logger.Instance.LogMessage("CC: {0}", Path.GetFileName(source));
+			#if DEBUG
+			Logger.Instance.LogMessage("output: {0} flags: {1}", output, ccargs);
+			#endif
 
 			var runWrapper = new RunWrapper(pathToGcc, ccargs);
 			return runWrapper.Run();
