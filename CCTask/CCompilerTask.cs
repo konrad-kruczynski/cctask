@@ -59,12 +59,12 @@ namespace CCTask
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
 			var flags = (Flags != null && Flags.Any()) ? Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
 
-			using (var cache = new FileCacheManager(ObjectFilesDirectory))
+			using(var cache = new FileCacheManager(ObjectFilesDirectory))
 			{
 				var objectFiles = new List<string>();
 				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) => {
 					var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
-					if (!compiler.Compile(source, objectFile, flags, cache.SourceHasChanged))
+					if(!compiler.Compile(source, objectFile, flags, cache.SourceHasChanged))
 					{
 						loopState.Break();
 					}
@@ -72,9 +72,9 @@ namespace CCTask
 					lock(objectFiles)
 					{
 						objectFiles.Add(objectFile);
-					}
+                    }
 				});
-				if (compilationResult.LowestBreakIteration != null)
+				if(compilationResult.LowestBreakIteration != null)
 				{
 					return false;
 				}

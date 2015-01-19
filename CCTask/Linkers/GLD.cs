@@ -29,7 +29,7 @@ using System.IO;
 
 namespace CCTask.Linkers
 {
-    public sealed class GLD : ILinker
+	public sealed class GLD : ILinker
 	{
 		public GLD(string pathToLd)
 		{

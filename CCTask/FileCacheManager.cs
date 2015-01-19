@@ -27,7 +27,7 @@ namespace CCTask
 		public bool SourceHasChanged(IEnumerable<string> sources, string args)
 		{
 			var changed = false;
-			foreach(var source in sources) 
+			foreach(var source in sources)
 			{
 				changed = changed | SourceHasChanged(source, args);
 			}

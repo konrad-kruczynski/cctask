@@ -18,7 +18,7 @@ namespace CCTask
 		{
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically; this put in constructor causes NRE 
 
-			if (!ObjectFiles.Any())
+			if(!ObjectFiles.Any())
 			{
 				return true;
 			}
