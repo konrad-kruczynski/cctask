@@ -42,7 +42,7 @@ namespace CCTask
 
 		public string ObjectFilesDirectory { get; set; }
 
-		public ITaskItem[] Flags   { get; set; }
+		public ITaskItem[] Flags { get; set; }
 
 		public bool Parallel { get; set; }
 
