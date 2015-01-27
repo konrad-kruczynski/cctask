@@ -16,6 +16,7 @@ namespace CCTask
 			hashDb = new Dictionary<string, Tuple<string, string>>();
 
 			hashDbFile = Path.Combine(directory ?? Directory.GetCurrentDirectory(), HashDbFilename);
+			Directory.CreateDirectory(Path.GetDirectoryName(hashDbFile));
 			Load();
 		}
 
