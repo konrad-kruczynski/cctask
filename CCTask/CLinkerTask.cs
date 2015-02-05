@@ -28,7 +28,7 @@ namespace CCTask
 			var flags = (Flags != null && Flags.Any()) ? Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
 			using(var cache = new FileCacheManager(Path.GetDirectoryName(Output)))
 			{
-				if(!cache.SourceHasChanged(ofiles, flags))
+                if(!cache.SourceHasChanged(ofiles, flags) && File.Exists(Output))
 				{
 					return true;
 				}
