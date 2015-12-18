@@ -13,7 +13,7 @@ namespace CCTask
 		public FileCacheManager(string directory = null)
 		{
 			hasherSource = new ThreadLocal<MD5>(() => MD5.Create());
-			hashDb = new Dictionary<string, Tuple<string, string>>();
+			hashDb = new Dictionary<Tuple<string, string>, string>();
 
 			hashDbFile = Path.Combine(directory ?? Directory.GetCurrentDirectory(), HashDbFilename);
 			Directory.CreateDirectory(Path.GetDirectoryName(hashDbFile));
@@ -50,14 +50,14 @@ namespace CCTask
 			foreach(var line in File.ReadLines(hashDbFile))
 			{
 				var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-				hashDb.Add(fileAndHash[0], Tuple.Create(fileAndHash[1], fileAndHash[2]));
+				hashDb.Add(Tuple.Create(fileAndHash[0], fileAndHash[1]), fileAndHash[2]);
 			}
 		}
 
 		private void Save()
 		{
 			Directory.CreateDirectory(Path.GetDirectoryName(hashDbFile));
-			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1};{2}", x.Key, x.Value.Item1, x.Value.Item2)));
+			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1};{2}", x.Key.Item1, x.Key.Item2, x.Value)));
 		}
 
 		private bool SourceHasChanged(string sourcePath, string args)
@@ -74,22 +74,23 @@ namespace CCTask
 			}
 
 			var result = false;
-			if(!hashDb.ContainsKey(sourcePath))
+			var hashKey = Tuple.Create(sourcePath, args);
+			if(!hashDb.ContainsKey(hashKey))
 			{
 				result = true;
 			}
 			else
 			{
-				result = (hashDb[sourcePath].Item1 != hash || hashDb[sourcePath].Item2 != args);
+				result = (hashDb[hashKey] != hash);
 			}
 			if(result)
 			{
-				hashDb[sourcePath] = Tuple.Create(hash, args);
+				hashDb[hashKey] = hash;
 			}
 			return result;
 		}
 
-		private readonly Dictionary<string, Tuple<string, string>> hashDb;
+		private readonly Dictionary<Tuple<string, string>, string> hashDb;
 		private readonly string hashDbFile;
 		private readonly ThreadLocal<MD5> hasherSource;
 
