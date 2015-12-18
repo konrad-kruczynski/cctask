@@ -2,6 +2,7 @@
 using Microsoft.Build.Framework;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 namespace CCTask
 {
@@ -11,6 +12,8 @@ namespace CCTask
 		public ITaskItem[] ObjectFiles { get; set; }
 
 		public ITaskItem[] Flags { get; set; }
+
+		public ITaskItem[] Libraries { get; set; }
 
 		[Required]
 		public string Output { get; set; }
@@ -24,11 +27,33 @@ namespace CCTask
 				return true;
 			}
 
+			var lfiles = new List<string>();
 			var ofiles = ObjectFiles.Select(x => x.ItemSpec);
-			var flags = (Flags != null && Flags.Any()) ? Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
+			var flags = (Flags != null && Flags.Any()) ? Flags.Select(x => x.ItemSpec).ToList() : new List<string>();
+
+			if(Libraries != null)
+			{
+				foreach(var library in Libraries.Select(x => x.ItemSpec))
+				{
+					if(File.Exists(library))
+					{
+						var directory = Path.GetDirectoryName(library);
+						var fileName = Path.GetFileName(library);
+
+						lfiles.Add(library);
+						flags.Add(string.Format(" -L{0} -l:{1}", directory, fileName));
+					}
+					else
+					{
+						flags.Add(string.Format("-l{0}", library));
+					}
+				}
+			}
+
+			var joinedFlags = string.Join(" ", flags);
 			using(var cache = new FileCacheManager(Path.GetDirectoryName(Output)))
 			{
-                if(!cache.SourceHasChanged(ofiles, flags) && File.Exists(Output))
+				if(!cache.SourceHasChanged(ofiles.Union(lfiles), joinedFlags) && File.Exists(Output))
 				{
 					return true;
 				}
@@ -36,7 +61,7 @@ namespace CCTask
 
 			// linking
 			var linker = CompilerProvider.Instance.CLinker;
-			return linker.Link(ofiles, Output, flags);
+			return linker.Link(ofiles, Output, joinedFlags);
 		}
 	}
 }
