@@ -47,17 +47,23 @@ namespace CCTask
 			{
 				return;
 			}
-			foreach(var line in File.ReadLines(hashDbFile))
+			lock(hashDb)
 			{
-				var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-				hashDb.Add(Tuple.Create(fileAndHash[0], fileAndHash[1]), fileAndHash[2]);
+				foreach(var line in File.ReadLines(hashDbFile))
+				{
+					var fileAndHash = line.Split(new [] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+					hashDb.Add(Tuple.Create(fileAndHash[0], fileAndHash[1]), fileAndHash[2]);
+				}
 			}
 		}
 
 		private void Save()
 		{
 			Directory.CreateDirectory(Path.GetDirectoryName(hashDbFile));
-			File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1};{2}", x.Key.Item1, x.Key.Item2, x.Value)));
+			lock(hashDb)
+			{
+				File.WriteAllLines(hashDbFile, hashDb.Select(x => string.Format("{0};{1};{2}", x.Key.Item1, x.Key.Item2, x.Value)));
+			}
 		}
 
 		private bool SourceHasChanged(string sourcePath, string args)
@@ -75,17 +81,20 @@ namespace CCTask
 
 			var result = false;
 			var hashKey = Tuple.Create(sourcePath, args);
-			if(!hashDb.ContainsKey(hashKey))
+			lock(hashDb)
 			{
-				result = true;
-			}
-			else
-			{
-				result = (hashDb[hashKey] != hash);
-			}
-			if(result)
-			{
-				hashDb[hashKey] = hash;
+				if(!hashDb.ContainsKey(hashKey))
+				{
+					result = true;
+				}
+				else
+				{
+					result = (hashDb[hashKey] != hash);
+				}
+				if(result)
+				{
+					hashDb[hashKey] = hash;
+				}
 			}
 			return result;
 		}
