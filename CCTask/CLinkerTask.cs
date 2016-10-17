@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
+using CCTask.Linkers;
 
 namespace CCTask
 {
@@ -14,6 +15,8 @@ namespace CCTask
 		public ITaskItem[] Flags { get; set; }
 
 		public ITaskItem[] Libraries { get; set; }
+
+		public string LinkerPath { get; set; }
 
 		[Required]
 		public string Output { get; set; }
@@ -60,9 +63,11 @@ namespace CCTask
 			}
 
 			// linking
-			var linker = CompilerProvider.Instance.CLinker;
+			var linker = new GLD(string.IsNullOrEmpty(LinkerPath) ? DefaultLinker : LinkerPath);
 			return linker.Link(ofiles, Output, joinedFlags);
 		}
+
+		private const string DefaultLinker = "cc";
 	}
 }
 

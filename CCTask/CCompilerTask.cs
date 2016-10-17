@@ -42,13 +42,14 @@ namespace CCTask
 
 		public string ObjectFilesDirectory { get; set; }
 
+		public string CompilerPath { get; set; }
+
 		public ITaskItem[] Flags { get; set; }
 
 		public bool Parallel { get; set; }
 
 		public CCompilerTask()
 		{
-			compiler = CompilerProvider.Instance.CCompiler;
 			regex = new Regex(@"\.c$");
 
 			Parallel = true;
@@ -56,6 +57,8 @@ namespace CCTask
 
 		public override bool Execute()
 		{
+			compiler = new GCC(string.IsNullOrEmpty(CompilerPath) ? DefaultCompiler : CompilerPath);
+
 			Logger.Instance = new XBuildLogProvider(Log); // TODO: maybe initialise statically
 			var flags = (Flags != null && Flags.Any()) ? Flags.Aggregate(string.Empty, (curr, next) => string.Format("{0} {1}", curr, next.ItemSpec)) : string.Empty;
 
@@ -72,7 +75,7 @@ namespace CCTask
 					lock(objectFiles)
 					{
 						objectFiles.Add(objectFile);
-                    }
+					}
 				});
 				if(compilationResult.LowestBreakIteration != null)
 				{
@@ -86,7 +89,9 @@ namespace CCTask
 		}
 
 		private readonly Regex regex;
-		private readonly ICompiler compiler;
+		private ICompiler compiler;
+
+		private const string DefaultCompiler = "cc";
 	}
 }
 
