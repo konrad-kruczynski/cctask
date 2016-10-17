@@ -75,7 +75,7 @@ namespace CCTask
 					lock(objectFiles)
 					{
 						objectFiles.Add(objectFile);
-                    }
+					}
 				});
 				if(compilationResult.LowestBreakIteration != null)
 				{
