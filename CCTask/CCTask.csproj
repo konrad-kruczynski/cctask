@@ -37,7 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="CompilerProvider.cs" />
     <Compile Include="CCompilerTask.cs" />
     <Compile Include="Compilers\GCC.cs" />
     <Compile Include="Compilers\ICompiler.cs" />
