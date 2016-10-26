@@ -41,25 +41,39 @@ namespace CCTask
 		internal bool Run()
 		{
 			var process = new Process { StartInfo = startInfo };
-			process.Start();
-			string line;
-			while((line = process.StandardOutput.ReadLine()) != null)
+			process.OutputDataReceived += (sender, e) =>
 			{
-				Logger.Instance.LogMessage(line);
-			}
-			while((line = process.StandardError.ReadLine()) != null)
-			{
-				if(line.Contains("error"))
+				if(!string.IsNullOrEmpty(e.Data))
 				{
-					Logger.Instance.LogError(line);
+					Logger.Instance.LogMessage(e.Data);
+				}
+			};
+
+			process.ErrorDataReceived += (sender, e) =>
+			{
+				if(string.IsNullOrEmpty(e.Data))
+				{
+					return;
+				}
+
+				if(e.Data.Contains("error"))
+				{
+					Logger.Instance.LogError(e.Data);
 				}
 				else
 				{
-					Logger.Instance.LogWarning(line);
+					Logger.Instance.LogWarning(e.Data);
 				}
-			}
+			};
+
+			process.Start();
+			process.BeginOutputReadLine();
+			process.BeginErrorReadLine();
+
 			process.WaitForExit();
-			return process.ExitCode == 0;
+			var successfulExit = (process.ExitCode == 0);
+			process.Close();
+			return successfulExit;
 		}
 
 		private readonly ProcessStartInfo startInfo;
