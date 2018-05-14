@@ -20,6 +20,7 @@ namespace CCTask
 			output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
 			return process.ExitCode == 0;
 		}
+		public const uint ErrorFileNotFound = 0x2;
 	}
 }
 
