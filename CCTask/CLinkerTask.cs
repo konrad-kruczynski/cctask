@@ -2,7 +2,9 @@
 using Microsoft.Build.Framework;
 using System.Linq;
 using System.IO;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using CCTask.Linkers;
 
 namespace CCTask
@@ -63,8 +65,31 @@ namespace CCTask
 			}
 
 			// linking
-			var linker = new GLD(string.IsNullOrEmpty(LinkerPath) ? DefaultLinker : LinkerPath);
-			return linker.Link(ofiles, Output, joinedFlags);
+			var linkerPath = string.IsNullOrEmpty(LinkerPath) ? DefaultLinker : LinkerPath;
+			var linker = new GLD(linkerPath);
+			try
+			{
+				return linker.Link(ofiles, Output, joinedFlags);
+			}
+			catch (Exception e)
+			{
+				if(e is Win32Exception error)
+				{
+					if(error.NativeErrorCode == Utilities.ErrorFileNotFound)
+					{
+						Logger.Instance.LogError($"Could not find \"{LinkerPath}\" linker.");
+					}
+					else
+					{
+						Logger.Instance.LogError($"An error was encountered while trying to run \"{LinkerPath}\" linker: {e.Message}.");
+					}
+				}
+				else 
+				{
+					Logger.Instance.LogError($"An unknown exception has been thrown in CLinkerTask. Message: { e.Message }.");
+				}
+				return false;
+			}
 		}
 
 		private const string DefaultLinker = "cc";
