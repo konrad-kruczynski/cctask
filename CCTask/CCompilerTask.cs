@@ -69,7 +69,12 @@ namespace CCTask
 				System.Threading.Tasks.ParallelLoopResult compilationResult;
 				try
 				{
-					compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) =>
+					// We normalize the directory separator in paths to make handling of gcc -MM easier.
+					var sourceFiles = System.IO.Path.DirectorySeparatorChar == '\\'
+						? Sources.Select(x => x.ItemSpec.Replace("\\", "/"))
+						: Sources.Select(x => x.ItemSpec);
+
+					compilationResult = System.Threading.Tasks.Parallel.ForEach(sourceFiles, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) =>
 					{
 						var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
 
