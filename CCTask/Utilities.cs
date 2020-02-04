@@ -14,6 +14,7 @@ namespace CCTask
 			startInfo.RedirectStandardError = true;
 			startInfo.RedirectStandardInput = true;
 			startInfo.RedirectStandardOutput = true;
+			startInfo.CreateNoWindow = true;
 			var process = new Process { StartInfo = startInfo };
 			process.Start();
 			process.WaitForExit();
