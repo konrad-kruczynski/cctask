@@ -36,6 +36,7 @@ namespace CCTask
 			startInfo.RedirectStandardError = true;
 			startInfo.RedirectStandardInput = true;
 			startInfo.RedirectStandardOutput = true;
+			startInfo.CreateNoWindow = true;
 		}
 
 		internal bool Run()

@@ -14,12 +14,14 @@ namespace CCTask
 			startInfo.RedirectStandardError = true;
 			startInfo.RedirectStandardInput = true;
 			startInfo.RedirectStandardOutput = true;
+			startInfo.CreateNoWindow = true;
 			var process = new Process { StartInfo = startInfo };
 			process.Start();
 			process.WaitForExit();
 			output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
 			return process.ExitCode == 0;
 		}
+		public const uint ErrorFileNotFound = 0x2;
 	}
 }
 

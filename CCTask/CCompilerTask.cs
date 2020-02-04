@@ -29,6 +29,7 @@ using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using CCTask.Compilers;
+using System.ComponentModel;
 
 namespace CCTask
 {
@@ -65,18 +66,48 @@ namespace CCTask
 			using(var cache = new FileCacheManager(ObjectFilesDirectory))
 			{
 				var objectFiles = new List<string>();
-				var compilationResult = System.Threading.Tasks.Parallel.ForEach(Sources.Select(x => x.ItemSpec), new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) => {
-					var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
-					if(!compiler.Compile(source, objectFile, flags, cache.SourceHasChanged))
-					{
-						loopState.Break();
-					}
+				System.Threading.Tasks.ParallelLoopResult compilationResult;
+				try
+				{
+					// We normalize the directory separator in paths to make handling of gcc -MM easier.
+					var sourceFiles = System.IO.Path.DirectorySeparatorChar == '\\'
+						? Sources.Select(x => x.ItemSpec.Replace("\\", "/"))
+						: Sources.Select(x => x.ItemSpec);
 
-					lock(objectFiles)
+					compilationResult = System.Threading.Tasks.Parallel.ForEach(sourceFiles, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = Parallel ? -1 : 1 }, (source, loopState) =>
 					{
-						objectFiles.Add(objectFile);
+						var objectFile = ObjectFilesDirectory == null ? regex.Replace(source, ".o") : string.Format("{0}/{1}", ObjectFilesDirectory, regex.Replace(source, ".o"));
+
+						if (!compiler.Compile(source, objectFile, flags, cache.SourceHasChanged))
+						{
+							loopState.Break();
+						}
+
+						lock (objectFiles)
+						{
+							objectFiles.Add(objectFile);
+						}
+					});
+				}
+				catch(Exception e)
+				{
+					if(e.InnerException is Win32Exception error)
+					{
+						if(error.NativeErrorCode == Utilities.ErrorFileNotFound)
+						{
+							Logger.Instance.LogError($"Could not find \"{CompilerPath}\" compiler.");
+						}
+						else
+						{
+							Logger.Instance.LogError($"An error was encountered while trying to run \"{CompilerPath}\" compiler: {e.InnerException.Message}.");
+						}
 					}
-				});
+					else 
+					{
+						Logger.Instance.LogError($"An unknown exception has been thrown in CCompilerTask. Message: { e.InnerException?.Message ?? e.Message }.");
+					}
+					return false;
+				}
 				if(compilationResult.LowestBreakIteration != null)
 				{
 					return false;
