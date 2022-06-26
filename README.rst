@@ -1,6 +1,11 @@
 CCTask
 ======
 
+Hi! A CCTask repository is still available for one's curiosity, nonetheless everyone looking for a MSBuild task to compile C sources should now look at one of the CCTask's forks, namely `dotnet-vcxproj <https://github.com/roozbehid/dotnet-vcxproj>`_. It is what CCTask expected to be at some point of time, but for what I never had time to actually do it.
+
+Old README
+==========
+
 A XBuild/MSBuild task to compile C sources by Konrad Kruczyński.
 
 What is it?
